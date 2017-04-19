@@ -16,6 +16,17 @@ FUNC_C_FILE = os.path.join(TEMPLATE_DIR, 'func.c')
 
 
 def get_c_names(main, func, steps, iterations, count, nthreads, output_dir):
+    """
+
+    :param main: Main function template
+    :param func: Traced function template
+    :param steps: Number of steps
+    :param iterations: Number of iterations per step
+    :param count: Number of functions to generation
+    :param nthreads: Number of threads
+    :param output_dir: The output directory
+    :return: Name of the main file, Name of the function definition file (.c), Name of the function declaration file(.h)
+    """
     main_name = os.path.join(output_dir, 'src', '%s_%d_%d_%d_%d_main.c' % (main, steps, iterations, count, nthreads))
     func_name_c = os.path.join(output_dir, 'src', '%s_%d_func.c' % (func, count))
     func_name_h = os.path.join(output_dir, 'src', '%s_%d_func.h' % (func, count))
@@ -23,18 +34,44 @@ def get_c_names(main, func, steps, iterations, count, nthreads, output_dir):
 
 
 def get_exe_name(main, func, steps, iterations, count, nthreads, output_dir):
+    """
+
+    :param main: Main function template
+    :param func: Traced function template
+    :param steps: Number of steps
+    :param iterations: Number of iterations per step
+    :param count: Number of functions to generation
+    :param nthreads: Number of threads
+    :param output_dir: The output directory
+    :return: The name of the executable
+    """
     return os.path.join(output_dir, '%s_%s_%d_%d_%d_%d' % (main, func, steps, iterations, nthreads, count))
 
 
 def get_output_dir(tool, inactive):
+    """
+    :param tool: The tool name
+    :param inactive: If the tracepoints are inactive
+    :return: The output directory name
+    """
     return '%s%s.out' % (tool, '-d' if inactive else '')
 
 
 def get_function_names(count):
+    """
+    :param count: The number of functions to generate
+    :return: The function name list
+    """
     return [(i, 'test_%d' % i) for i in range(count)]
 
 
 def generate_str(in_str, variables):
+    """
+    Replaces template variables in a string
+    :param in_str: The input string
+    :param variables: The variables to replace
+    :return: The output string
+    """
     for v in variables:
         if '%s%{}%%'.format(v) in in_str:
             in_str = in_str.replace('%s%{}%%'.format(v), str(variables[v]))
@@ -44,6 +81,12 @@ def generate_str(in_str, variables):
 
 
 def generate_file(in_str, out_name, variables):
+    """
+    Generates a source file from a template
+    :param in_str: The template string
+    :param out_name: The output file name
+    :param variables: The variables to replace
+    """
     if not os.path.exists(os.path.dirname(out_name)):
         os.makedirs(os.path.dirname(out_name))
     out = open(out_name, 'w')
@@ -51,6 +94,16 @@ def generate_file(in_str, out_name, variables):
 
 
 def do_generate(main, func, steps, iterations, count, nthreads, args):
+    """
+    Generates source files from templates
+    :param main: Main function template
+    :param func: Traced function template
+    :param steps: Number of steps
+    :param iterations: Number of iterations per step
+    :param count: Number of functions to generation
+    :param nthreads: Number of threads
+    :param args: Command line arguments
+    """
     output_dir = get_output_dir(args.tool, args.inactive)
 
     main_file = open(os.path.join(MAIN_DIR, '%s.c' % main)).read()
@@ -90,7 +143,17 @@ def do_generate(main, func, steps, iterations, count, nthreads, args):
 
 
 def do_compile(main, func, steps, iterations, count, nthreads, args):
-
+    """
+    Compiles some sources code into an executable
+    :param main: Main function template
+    :param func: Traced function template
+    :param steps: Number of steps
+    :param iterations: Number of iterations per step
+    :param count: Number of functions to generation
+    :param nthreads: Number of threads
+    :param args: Command line arguments
+    :return: Compilation time
+    """
     output_dir = get_output_dir(args.tool, args.inactive)
 
     c_names = get_c_names(main, func, steps, iterations, count, nthreads, output_dir)
@@ -199,6 +262,11 @@ class CompileArgs:
 
 
 def generic_run_preset(args):
+    """
+    Gets the run preset compile arguments from command line
+    :param args: Command line arguments
+    :return: List of compile command line arguments
+    """
     if args.preset == 'time':
         compile_args = [
             CompileArgs(args.tool, args.preset, [], [], [], 'time', 'inc', 5, 2**24, 1, 1, args.inactive, args)
@@ -226,6 +294,14 @@ def generic_run_preset(args):
 
 
 def generic_run(args, pre_exe=(), post_exe=(), pre_call=None, post_call=None):
+    """
+    Runs the program
+    :param args: The command line arguments
+    :param pre_exe: tuple or list of strings that will be prepended to the executable name. Used to customize the command.
+    :param post_exe: tuple or list of strings that will be appended to the executable name. Used to customize the command.
+    :param pre_call: Function that will be called before executing the command
+    :param post_call: Function that will be called after executing the command
+    """
     env = {k: os.environ[k] for k in os.environ}
     for v in args.env:
         k, v = v.split('=')

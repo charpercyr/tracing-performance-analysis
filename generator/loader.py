@@ -1,3 +1,14 @@
+"""
+Every tool **must** implement this interface
+
+prepare(parser)
+    Adds the command line arguments to the parser
+    You can optionnaly use generic.generic_prepare to add default arguments, in this case, you must implement
+        do_generate, do_compile, do_run and do_clean
+
+do_<func>(args)
+    Does a command, replace func with the command. args is the command line arguments' values
+"""
 
 import importlib
 import os

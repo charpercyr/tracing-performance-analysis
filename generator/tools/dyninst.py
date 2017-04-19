@@ -21,8 +21,8 @@ def do_compile(args):
 
 def do_run(args):
 
-    # if os.geteuid() != 0:
-    #     raise OSError('Run this script as root')
+    if os.geteuid() != 0:
+        raise OSError('Run this script as root')
 
     env = {k: os.environ[k] for k in os.environ}
     env['DYNINSTAPI_RT_LIB'] = '/usr/local/lib/libdyninstAPI_RT.so'
